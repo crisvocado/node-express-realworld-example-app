@@ -3,6 +3,13 @@ import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import routes from './app/routes/routes';
 import HttpException from './app/models/http-exception.model';
+import {
+  initLogcore,
+  traceContextMiddleware,
+  errorLoggingMiddleware,
+} from './logcore';
+
+initLogcore();
 
 const app = express();
 
@@ -10,6 +17,7 @@ const app = express();
  * App Configuration
  */
 
+app.use(traceContextMiddleware);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -23,6 +31,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 });
 
 /* eslint-disable */
+app.use(errorLoggingMiddleware);
 app.use(
   (
     err: Error | HttpException,
