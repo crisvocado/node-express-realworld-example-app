@@ -3,6 +3,9 @@ import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import routes from './app/routes/routes';
 import HttpException from './app/models/http-exception.model';
+import { initLogcore, logcoreMiddleware, captureError } from './logcore';
+
+initLogcore();
 
 const app = express();
 
@@ -10,6 +13,7 @@ const app = express();
  * App Configuration
  */
 
+app.use(logcoreMiddleware());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -38,9 +42,13 @@ app.use(
       });
       // @ts-ignore
     } else if (err && err.errorCode) {
+      if ((err as any).errorCode >= 500) {
+        captureError(err, { req });
+      }
       // @ts-ignore
       res.status(err.errorCode).json(err.message);
     } else if (err) {
+      captureError(err, { req });
       res.status(500).json(err.message);
     }
   },
