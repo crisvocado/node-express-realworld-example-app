@@ -3,6 +3,9 @@ import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import routes from './app/routes/routes';
 import HttpException from './app/models/http-exception.model';
+import { initLogcore, logcoreMiddleware, logcoreErrorMiddleware } from './logcore';
+
+initLogcore();
 
 const app = express();
 
@@ -10,6 +13,7 @@ const app = express();
  * App Configuration
  */
 
+app.use(logcoreMiddleware);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,6 +25,8 @@ app.use(express.static(__dirname + '/assets'));
 app.get('/', (req: express.Request, res: express.Response) => {
   res.json({ status: 'API is running on /api' });
 });
+
+app.use(logcoreErrorMiddleware);
 
 /* eslint-disable */
 app.use(
