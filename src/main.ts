@@ -3,6 +3,9 @@ import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import routes from './app/routes/routes';
 import HttpException from './app/models/http-exception.model';
+import { createLogcoreAdapter } from './logcore/adapter';
+
+const logcoreAdapter = createLogcoreAdapter();
 
 const app = express();
 
@@ -45,6 +48,11 @@ app.use(
     }
   },
 );
+
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  logcoreAdapter(err);
+  next(err);
+});
 
 /**
  * Server activation
