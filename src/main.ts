@@ -3,6 +3,9 @@ import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import routes from './app/routes/routes';
 import HttpException from './app/models/http-exception.model';
+import { initLogcore, logcoreMiddleware, logcoreErrorMiddleware } from './logcore';
+
+initLogcore();
 
 const app = express();
 
@@ -13,6 +16,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(logcoreMiddleware);
 app.use(routes);
 
 // Serves images
@@ -23,6 +27,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 });
 
 /* eslint-disable */
+app.use(logcoreErrorMiddleware);
 app.use(
   (
     err: Error | HttpException,
